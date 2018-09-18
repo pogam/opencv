@@ -509,11 +509,10 @@ double cv::findTransformECC(InputArray templateImage,
             warpPerspective(preMask,    imageMask,       map, imageMask.size(),       maskFlags);
 
         }
-        
-		//RONAN combine 2 mask here in imageMask
-		sumMask = Mat::zeros(hd, wd, CV_8U);
+        //RONAN combine 2 mask here in imageMask
+        sumMask = Mat::zeros(hd, wd, CV_8U);
         add(imageMask, tempMask, sumMask);
-		imageMask = Mat::zeros(hd, wd, CV_8U);
+        imageMask = Mat::zeros(hd, wd, CV_8U);
         divide( sumMask, mattwo, imageMask);
 		//RONAN
 		//imshow( "XX", imageWarped );                // Show our image inside it.
