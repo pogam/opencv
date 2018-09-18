@@ -483,7 +483,7 @@ double cv::findTransformECC(InputArray templateImage,
     const int imageFlags = INTER_LINEAR  + WARP_INVERSE_MAP;
     const int maskFlags  = INTER_NEAREST + WARP_INVERSE_MAP;
 
-	namedWindow("XX"); // Create a window for display.
+	//namedWindow("XX"); // Create a window for display.
 
     // iteratively update map_matrix
     double rho      = -1;
@@ -517,6 +517,11 @@ double cv::findTransformECC(InputArray templateImage,
         //RONAN
         //imshow( "XX", imageWarped );                // Show our image inside it.
         //waitKey(0); // Wait for a keystroke in the window
+    
+	    Mat imageMaskFloat;
+		imageMask.convertTo(imageMaskFloat, CV_32F);
+		gradientXWarped = gradientXWarped.mul(imageMaskFloat);
+    	gradientYWarped = gradientYWarped.mul(imageMaskFloat);
 		
         Scalar imgMean, imgStd, tmpMean, tmpStd;
         meanStdDev(imageWarped,   imgMean, imgStd, imageMask);
