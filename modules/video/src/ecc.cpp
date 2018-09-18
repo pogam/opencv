@@ -514,11 +514,11 @@ double cv::findTransformECC(InputArray templateImage,
         add(imageMask, tempMask, sumMask);
         imageMask = Mat::zeros(hd, wd, CV_8U);
         divide( sumMask, mattwo, imageMask);
-		//RONAN
-		//imshow( "XX", imageWarped );                // Show our image inside it.
-		//waitKey(0); // Wait for a keystroke in the window
+        //RONAN
+        //imshow( "XX", imageWarped );                // Show our image inside it.
+        //waitKey(0); // Wait for a keystroke in the window
 		
-		Scalar imgMean, imgStd, tmpMean, tmpStd;
+        Scalar imgMean, imgStd, tmpMean, tmpStd;
         meanStdDev(imageWarped,   imgMean, imgStd, imageMask);
         meanStdDev(templateFloat, tmpMean, tmpStd, imageMask);
  
