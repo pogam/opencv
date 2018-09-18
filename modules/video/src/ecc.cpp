@@ -41,6 +41,8 @@
  
 #include "precomp.hpp"
 #include <iostream>
+//RONAN
+#include <opencv2/highgui.hpp> 
 
 /****************************************************************************************\
 *                                       Image Alignment (ECC algorithm)                  *
@@ -480,7 +482,9 @@ double cv::findTransformECC(InputArray templateImage,
  
     const int imageFlags = INTER_LINEAR  + WARP_INVERSE_MAP;
     const int maskFlags  = INTER_NEAREST + WARP_INVERSE_MAP;
- 
+
+	namedWindow( "XX", WINDOW_AUTOSIZE ); // Create a window for display.
+
     // iteratively update map_matrix
     double rho      = -1;
     double last_rho = - termination_eps;
@@ -511,8 +515,10 @@ double cv::findTransformECC(InputArray templateImage,
 		imageMask = Mat::zeros(hd, wd, CV_8U);
         divide( sumMask, mattwo, imageMask) ;
 		//RONAN
+		imshow( "XX", imageMask );                // Show our image inside it.
+		waitKey(0); // Wait for a keystroke in the window
 		
-        Scalar imgMean, imgStd, tmpMean, tmpStd;
+		Scalar imgMean, imgStd, tmpMean, tmpStd;
         meanStdDev(imageWarped,   imgMean, imgStd, imageMask);
         meanStdDev(templateFloat, tmpMean, tmpStd, imageMask);
  
