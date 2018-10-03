@@ -408,6 +408,7 @@ double cv::findTransformECC(InputArray templateImage,
     Mat imageFloat    = Mat(hd, wd, CV_32F);// to store the (smoothed) input image
     Mat imageWarped   = Mat(hs, ws, CV_32F);// to store the warped zero-mean input image
     Mat imageMask     = Mat(hs, ws, CV_8U); // to store the final mask
+    Mat combinedMask     = Mat(hs, ws, CV_8U); // to store the final mask
  
     Mat inputMaskMat = inputMask.getMat();
     //to use it for mask warping
@@ -512,27 +513,33 @@ double cv::findTransformECC(InputArray templateImage,
         //RONAN combine 2 mask here in imageMask
         sumMask = Mat::zeros(hd, wd, CV_8U);
         add(imageMask, tempMask, sumMask);
-        imageMask = Mat::zeros(hd, wd, CV_8U);
-        divide( sumMask, mattwo, imageMask);
+        combinedMask = Mat::zeros(hd, wd, CV_8U);
+        divide( sumMask, mattwo, combinedMask);
         //RONAN
         //imshow( "XX", imageWarped );                // Show our image inside it.
         //waitKey(0); // Wait for a keystroke in the window
     
-	    Mat imageMaskFloat;
-		imageMask.convertTo(imageMaskFloat, CV_32F);
-		gradientXWarped = gradientXWarped.mul(imageMaskFloat);
-    	gradientYWarped = gradientYWarped.mul(imageMaskFloat);
+	    Mat combinedMaskFloat;
+		combinedMask.convertTo(combinedMaskFloat, CV_32F);
+		gradientXWarped = gradientXWarped.mul(combinedMaskFloat);
+    	gradientYWarped = gradientYWarped.mul(combinedMaskFloat);
 		
         Scalar imgMean, imgStd, tmpMean, tmpStd;
-        meanStdDev(imageWarped,   imgMean, imgStd, imageMask);
-        meanStdDev(templateFloat, tmpMean, tmpStd, imageMask);
+        //meanStdDev(imageWarped,   imgMean, imgStd, imageMask);
+        //meanStdDev(templateFloat, tmpMean, tmpStd, imageMask);
+        meanStdDev(imageWarped,   imgMean, imgStd, combinedMask);
+        meanStdDev(templateFloat, tmpMean, tmpStd, combinedMask);
  
-        subtract(imageWarped,   imgMean, imageWarped, imageMask);//zero-mean input
-        templateZM = Mat::zeros(templateZM.rows, templateZM.cols, templateZM.type());
-        subtract(templateFloat, tmpMean, templateZM,  imageMask);//zero-mean template
- 
-        const double tmpNorm = std::sqrt(countNonZero(imageMask)*(tmpStd.val[0])*(tmpStd.val[0]));
-        const double imgNorm = std::sqrt(countNonZero(imageMask)*(imgStd.val[0])*(imgStd.val[0]));
+        subtract(imageWarped,   imgMean, imageWarped, combinedMask);//zero-mean input
+		templateZM = Mat::zeros(templateZM.rows, templateZM.cols, templateZM.type());
+		subtract(templateFloat, tmpMean, templateZM,  combinedMask) ;//zero-mean template
+        //subtract(templateFloat, imgMean, templateZM,  combinedMask) ;//zero-mean template
+       
+		const double tmpNorm = norm(templateZM,  cv::NORM_L2, combinedMask);
+		const double imgNorm = norm(imageWarped, cv::NORM_L2, combinedMask);
+
+        //const double tmpNorm = std::sqrt(countNonZero(combinedMask)*(tmpStd.val[0])*(tmpStd.val[0]));
+        //const double imgNorm = std::sqrt(countNonZero(combinedMask)*(imgStd.val[0])*(imgStd.val[0]));
  
         // calculate jacobian of image wrt parameters
         switch (motionType){
@@ -565,7 +572,7 @@ double cv::findTransformECC(InputArray templateImage,
         }
  
         //if (i==1) {std::cout << "     " << rho << std::endl;}
-        //std::cout << "     " << rho << std::endl;
+        //std::cout << "     " << rho << ' ' << imgMean<< ' ' << tmpMean << ' ' << imgNorm << ' ' << tmpNorm << std::endl;
  
         // project images into jacobian
         project_onto_jacobian_ECC( jacobian, imageWarped, imageProjection);
